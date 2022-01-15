@@ -1,0 +1,235 @@
+---
+title: "Untitled"
+author: "sameera talafha"
+date: "8/11/2021"
+output: html_document
+---
+
+```{r}
+set.seed(16)
+library(crayon)
+library(knitr)    # For knitting document and include_graphics function
+library(ggplot2)  # For plottin
+library(png) 
+library(usdm)
+library(ggplot2)
+library(jtools)
+library('lares')
+require(GGally)
+library(readxl)
+library(dplyr)
+library(caret)
+```
+
+
+```{r}
+library(lattice)
+library(rpart)
+library(glmnet)
+library(Matrix)
+library(caret)
+library(car)
+data<- read.csv(file ="final2.csv",header=T)
+data=na.omit(data)
+drop <- c('BIRTH','SCREEN','OTHERDRUGS','METHADONE','ANYOPIATEDAYS','HALLUC' )
+data = data[,!(names(data) %in% drop)]
+colnames(data)
+```
+
+
+
+```{r}
+corr_var(data, # name of dataset
+  AGE, # name of variable to focus on
+  top = 20, ranks = TRUE  
+) 
+```
+
+### Regression Imputation
+
+```{r}
+set.seed(16)
+data1<- read.csv(file ='/home/sameerahtalafha/new_project/new/tables/SEX-original.csv',header=T)
+data1=na.omit(data1)
+
+#data1$AGE <- cut(data1$AGE, c(15, 21, 35, 45, 65,100), c(0, 1, 2, 3,4), include.lowest=TRUE)
+#data1$DRUGDAYS <- cut(data1$DRUGDAYS, c(0, 1, 10, 20, 31), c(0, 1, 2,3), include.lowest=TRUE)
+#data1$ALCDRUGS <- cut(data1$ALCDRUGS, c(0, 1, 10, 20, 31), c(0, 1, 2,3), include.lowest=TRUE)
+#drop <- c("HALLUC","BIRTH","METHADONE","OTHERDRUGS","ID","SCREEN","BINGEDAYS")
+drop <- c("DAST","HISPANIC","ACTIVE","AUDIT","COSCREEN" ,"BT","DAYSCOCAINE" ,"MARYJDAYS"  , "METHDAYS"  ,  "INJECT","BINGEDAYS")
+data1 = data1[,!(names(data) %in% drop)]
+data=data1
+data$AGE[rbinom(N, 1, 0.01) == 1] <- NA # Aproximately 10% missings in y
+head(data) # First 6 rows of our example data
+colnames(data)
+head(data)
+```
+
+```{r}
+set.seed(123) # for reproducible results
+sample.size <- floor(0.75 * nrow(data1))
+train.index <- sample(seq_len(nrow(data1)), size = sample.size)
+train <- data1[train.index, ]
+test <- data1[- train.index, ]
+```
+
+```{r}
+model2= lm(AGE ~0+SEX+BI+RACE+VET+DEPLOY, data=train)
+model1 = lm(AGE ~as.factor(BI)+as.factor(RACE)+as.factor(VET)+as.factor(DEPLOY), data=train)
+anova(model2,model1)
+```
+```{r}
+#Let’s make default model.
+summary(model1)
+par(mfrow=c(2,2))
+plot(model1)
+```
+
+```{r}
+res <- resid(model1)
+sum(res)
+```
+
+
+```{r}
+plot(density(res))
+```
+```{r}
+head(predict(model1, test, interval = "prediction"), 5)
+```
+
+
+```{r}
+pred<-predict(model1, test)
+
+```
+
+```{r}
+actuals_preds <- data.frame(cbind(actuals=test$AGE, predicteds=as.integer(pred)))  # make actuals_predicteds dataframe.
+correlation_accuracy <- cor(actuals_preds)  # 82.7%
+correlation_accuracy
+head(actuals_preds)
+```
+
+```{r}
+min_max_accuracy <- mean(apply(actuals_preds, 1, min) / apply(actuals_preds, 1, max))  
+min_max_accuracy
+```
+
+
+
+```{r}
+mape <- mean(abs((actuals_preds$predicteds - actuals_preds$actuals))/actuals_preds$actuals) 
+mape
+```
+
+
+
+
+```{r}
+error <- test$AGE -pred
+```
+
+
+
+```{r}
+RMSE <- sqrt(mean(error^2))
+RMSE
+```
+
+
+```{r}
+x=which(is.na(data$AGE))
+data1$AGE[117]
+length(x)
+```
+
+```{r}
+which(is.na(data1$AGE))
+```
+
+```{r}
+library("mice")
+tempData2 <- mice(data,m=1,seed=245435)
+modelFit2 <- with(tempData2,lm(AGE ~ -1+SEX +RACE+VET+DEPLOY+BI+RT+DRUGDAYS+ALCDRUGS+TOBMONTH))
+summary(pool(modelFit2))
+```
+
+```{r}
+tempData2$imp$AGE
+```
+```{r}
+data1$AGE[117]
+data1$AGE[417]
+data1$AGE[717]
+data1$AGE[1017]
+data1$AGE[1317]
+data1$AGE[1617]
+data1$AGE[1917]
+data1$AGE[2217]
+data1$AGE[2517]
+data1$AGE[2817]
+```
+```{r}
+data[117,]
+```
+
+
+```{r}
+library(mice)
+nhanes=data
+imp <- mice(data, maxit = 2, m = 20,seed=2)
+fit <- with(data = imp, exp = lm(AGE ~ SEX +RACE+VET+DEPLOY+BI+RT+DRUGDAYS+ALCDRUGS+TOBMONTH))
+pooled <- pool(fit)
+
+# Copy one of the fitted lm models fit to
+#   one of the imputed datasets
+pooled_lm = fit$analyses[[5]]
+# Replace the fitted coefficients with the pooled
+#   estimates (need to check they are replaced in
+#   the correct order)
+pooled_lm$coefficients = summary(pooled)$estimate
+
+# Predict - predictions seem to match the
+#   pooled coefficients rather than the original
+#   lm that was copied
+#predict(fit$analyses[[1]], newdata = nhanes)
+
+predict(pooled_lm, newdata = nhanes[717,])
+# input: mira object
+pool.r.squared(fit)
+pool.r.squared(fit, adjusted = TRUE)
+```
+
+```{r}
+y=predict(pooled_lm, newdata = nhanes[x,],interval = "prediction")
+z=as.integer(y[1:189,1])
+z
+```
+
+```{r}
+f=data1[x,21]
+f
+```
+
+```{r}
+sum(abs(z-f)<=10)
+```
+```{r}
+(67/189)*100
+```
+
+
+```{r}
+res1 <- resid(pooled_lm)
+sum(res1)
+```
+
+```{r}
+plot(density(res1))
+```
+
+```{r}
+shapiro.test(res1)
+```
+
