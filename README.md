@@ -4,8 +4,8 @@ This repository represents our work in the paper `Comprehensive prediction analy
 # The first pre-processing of our dataset
 This is initial-processing step.  Start the notebook server from the command line:
 
-``bash
+```bash
 jupyter notebook
-``
+```
 
-See (initial-preprocessing/Cleaned the data (initial pre-processing)). 
+See (`initial-preprocessing/Cleaned the data (initial pre-processing)`). 
