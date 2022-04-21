@@ -1,7 +1,7 @@
 # Comprehensive-prediction-analysis-of-alcohol-and-drug-use-disorder-using-machine-deep-learning-algor
 This repository represents our work in the paper `Comprehensive prediction analysis of alcohol and drug use disorder using machine/deep learning algorithms` ![flowchart](images/figure1-1.png)
 
-# Dataset
+## Dataset
 An observational cohort of 6978 adults was admitted in the western region of Alabama at three medical facilities, the screening, brief intervention, and referral to treatment in Alabama (AL-SBIRT) program between February 2020  and December 2020.
 
 ## Pre-processing the dataset
