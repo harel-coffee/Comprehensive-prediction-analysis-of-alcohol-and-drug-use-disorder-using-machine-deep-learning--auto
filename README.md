@@ -16,8 +16,13 @@ jupyter notebook
 See (`initial-preprocessing/Cleaned the data (initial pre-processing)`). 
 
 ### The second stage of pre-processing the dataset
- Accordingly, to develop more successful models, the data pre-processing techniques are used :
+ Accordingly, to develop more successful models, the data pre-processing techniques are used (``see preprocessing_Stage_2``) :
  
   - Handling missing data
 
   - Synthetic Minority Over-sampling Technique for Nominal and Continuous features (SMOTE-NC)
+
+## Our data analysis was dependent on three main experiments 
+ - Experiment (1): we applied the machine learning/deep learning models for classification of DAST/AUDIT scores using all the features as predictors.
+ - Experiment (2): we  applied the features selection model before training the machine learning/deep learning models.
+ - Experiment (3): we applied  mixed-effect for classification of DAST/AUDIT scores.
