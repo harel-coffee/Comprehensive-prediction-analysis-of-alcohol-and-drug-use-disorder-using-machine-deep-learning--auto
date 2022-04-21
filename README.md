@@ -17,6 +17,7 @@ See (`initial-preprocessing/Cleaned the data (initial pre-processing)`).
 
 ### The second stage of pre-processing the dataset
  Accordingly, to develop more successful models, the data pre-processing techniques are used :
-  -Handling missing data
+ 
+  - Handling missing data
 
-  -Synthetic Minority Over-sampling Technique for Nominal and Continuous features (SMOTE-NC)
+  - Synthetic Minority Over-sampling Technique for Nominal and Continuous features (SMOTE-NC)
